@@ -136,23 +136,31 @@ let markers = []; // { rec, marker, lat, lon }
 
 const sidebar = document.getElementById('sidebar');
 
-// Leaflet-control: Lista/Kartta -toggle (näkyy varmasti iPhonessa)
+// Leaflet-control: Lista / Kartta -toggle (varma iPhonessa)
 const SidebarToggle = L.Control.extend({
   options: { position: 'topright' },
   onAdd: function () {
     const btn = L.DomUtil.create('button', 'sauna-toggle-btn');
-    btn.classList.add('sauna-toggle-btn');
     btn.textContent = '📋 Näytä lista';
 
-    // estä kartan zoom/drag kun klikataan nappia
+    // Estä kartan drag/zoom kun painetaan nappia
     L.DomEvent.disableClickPropagation(btn);
     L.DomEvent.disableScrollPropagation(btn);
 
-    btn.addEventListener('click', () => {
-      sidebar.classList.toggle('open');
-      btn.textContent = sidebar.classList.contains('open')
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+
+      const sidebarEl = document.getElementById('sidebar');
+      if (!sidebarEl) return;
+
+      sidebarEl.classList.toggle('open');
+
+      btn.textContent = sidebarEl.classList.contains('open')
         ? '🗺️ Näytä kartta'
         : '📋 Näytä lista';
+
+      // Pieni varmistus: Leafletin pitää joskus päivittää kokoa kun paneeli avautuu
+      setTimeout(() => { map.invalidateSize(); }, 150);
     });
 
     return btn;
