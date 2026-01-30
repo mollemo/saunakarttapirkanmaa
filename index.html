@@ -30,7 +30,44 @@
     .small { font-size: 12px; }
     .legend { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:8px; }
     .swatch { width:12px; height:12px; border-radius: 3px; display:inline-block; border: 1px solid rgba(0,0,0,.15);}
-  </style>
+  
+@media (max-width: 768px) {
+  #app {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+  #sidebar {
+    max-height: 45vh;
+    border-right: none;
+    border-bottom: 1px solid #ddd;
+    display: none;
+  }
+  #sidebar.open {
+    display: block;
+  }
+  #map {
+    height: calc(100vh - 48px);
+  }
+  #mobileToggle {
+    display: block;
+  }
+}
+
+#mobileToggle {
+  display: none;
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 1000;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-size: 14px;
+  box-shadow: 0 2px 6px rgba(0,0,0,.25);
+}
+
+</style>
 </head>
 <body>
 <div id="app">
@@ -56,6 +93,7 @@
         <option value="40">≥ 40</option>
       </select>
       <button id="fit">Sovita kartta</button>
+      <button id="top10" title="Näytä top 10 pisteiden mukaan">Top 10</button>
       <button id="clearCache" title="Tyhjennä tallennetut koordinaatit">Tyhjennä koordinaattivälimuisti</button>
     </div>
 
@@ -70,7 +108,9 @@
       Vinkki: Koordinaatit tallennetaan selaimen localStorageen, joten seuraava avaus on nopeampi.
     </div>
   </div>
-  <div id="map"></div>
+  
+<button id="mobileToggle">📋 Näytä lista</button>
+<div id="map"></div>
 </div>
 
 <script
@@ -239,6 +279,60 @@ async function runGeocodeQueue() {
   fitMapToVisible();
 }
 
+
+// Top 10 toggle
+const topBtn = document.getElementById('top10');
+let topMode = false;
+
+function showFiltered(filtered) {
+  // show/hide markers
+  markers.forEach(m => {
+    const keep = filtered.some(r => r.rank === m.rec.rank && r.name === m.rec.name);
+    if (keep) markersLayer.addLayer(m.marker);
+    else markersLayer.removeLayer(m.marker);
+  });
+  renderList(filtered);
+}
+
+function computeTop10() {
+  return [...SAUNAS]
+    .filter(r => r.points != null)
+    .sort((a,b) => (b.points - a.points))
+    .slice(0, 10);
+}
+
+topBtn.addEventListener('click', () => {
+  topMode = !topMode;
+  if (topMode) {
+    // reset user filters for clarity
+    document.getElementById('q').value = '';
+    document.getElementById('minPoints').value = '';
+    const top = computeTop10();
+    showFiltered(top);
+    topBtn.textContent = 'Näytä kaikki';
+    fitMapToVisible();
+  } else {
+    topBtn.textContent = 'Top 10';
+    applyFilters();
+    fitMapToVisible();
+  }
+});
+
+// If user starts filtering manually, exit top mode
+document.getElementById('q').addEventListener('input', () => {
+  if (topMode) {
+    topMode = false;
+    topBtn.textContent = 'Top 10';
+  }
+});
+document.getElementById('minPoints').addEventListener('change', () => {
+  if (topMode) {
+    topMode = false;
+    topBtn.textContent = 'Top 10';
+  }
+});
+
+
 // Controls
 document.getElementById('q').addEventListener('input', applyFilters);
 document.getElementById('minPoints').addEventListener('change', applyFilters);
@@ -257,5 +351,18 @@ document.getElementById('clearCache').addEventListener('click', () => {
 renderList(SAUNAS.slice(0, 50));
 runGeocodeQueue();
 </script>
+
+<script>
+const toggleBtn = document.getElementById('mobileToggle');
+const sidebar = document.getElementById('sidebar');
+
+toggleBtn.addEventListener('click', () => {
+  sidebar.classList.toggle('open');
+  toggleBtn.textContent = sidebar.classList.contains('open')
+    ? '🗺️ Näytä kartta'
+    : '📋 Näytä lista';
+});
+</script>
+
 </body>
 </html>
