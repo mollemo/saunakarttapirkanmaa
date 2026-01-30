@@ -266,7 +266,19 @@ function iconFor(points) {
 function keyFor(rec) {
   return `sauna_geo_v1::${rec.rank}::${rec.name}`;
 }
+function sortSaunas(arr) {
+  return [...arr].sort((a, b) => {
+    const ap = Number(a.points ?? -Infinity);
+    const bp = Number(b.points ?? -Infinity);
+    if (bp !== ap) return bp - ap; // points DESC
 
+    const ar = Number(a.rank ?? Infinity);
+    const br = Number(b.rank ?? Infinity);
+    if (ar !== br) return ar - br; // rank ASC (NUMERIC)
+
+    return String(a.name ?? '').localeCompare(String(b.name ?? ''), 'fi');
+  });
+}
 async function geocode(rec) {
   const k = keyFor(rec);
   const cached = localStorage.getItem(k);
@@ -316,6 +328,7 @@ function sortBestFirst(arr) {
    7) LIST + FILTERS
    =================================================== */
 function renderList(filtered) {
+  filtered = sortSaunas(filtered);
   const el = document.getElementById('list');
   el.innerHTML = '';
 
