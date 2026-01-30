@@ -159,21 +159,22 @@ const SidebarToggle = L.Control.extend({
     L.DomEvent.disableScrollPropagation(btn);
 
     btn.addEventListener('click', (e) => {
-      e.preventDefault();
+  e.preventDefault();
+  e.stopPropagation();
 
-      const sidebarEl = document.getElementById('sidebar');
-      if (!sidebarEl) return;
+  const sidebarEl = document.getElementById('sidebar');
+  if (!sidebarEl) return;
 
-      sidebarEl.classList.toggle('open');
+  sidebarEl.classList.toggle('open');
 
-      btn.textContent = sidebarEl.classList.contains('open')
-        ? '🗺️ Näytä kartta'
-        : '📋 Näytä lista';
+  btn.textContent = sidebarEl.classList.contains('open')
+    ? '🗺️ Näytä kartta'
+    : '📋 Näytä lista';
 
-      // Pieni varmistus: Leafletin pitää joskus päivittää kokoa kun paneeli avautuu
-      setTimeout(() => { map.invalidateSize(); }, 150);
-    });
-
+  // Varmista että lista näkyy heti (ja Leaflet ei sekoa layoutista)
+  sidebarEl.scrollTop = 0;
+  setTimeout(() => map.invalidateSize(), 150);
+});
     return btn;
   }
 });
