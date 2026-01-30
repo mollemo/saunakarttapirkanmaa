@@ -29,51 +29,46 @@
     #bar { height: 10px; width: 0%; background: #222; }
     .small { font-size: 12px; }
     .legend { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:8px; }
-    .swatch { width:12px; height:12px; border-radius: 3px; display:inline-block; border: 1px solid rgba(0,0,0,.15);}
-  
-@media (max-width: 768px) {
-  #app {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto 1fr;
-  }
-  #sidebar {
-    max-height: 45vh;
-    border-right: none;
-    border-bottom: 1px solid #ddd;
-    display: none;
-  }
-  #sidebar.open {
-    display: block;
-  }
-  #map {
-    height: calc(100vh - 48px);
-  }
-  #mobileToggle {
-    display: block;
-  }
-}
+    .swatch { width:12px; height:12px; border-radius: 3px; display:inline-block; border: 1px solid rgba(0,0,0,.15); }
 
-#mobileToggle {
-  display: none;
-  position: fixed;
-  top: 12px;
-  right: 12px;
-  left: auto;
-  z-index: 99999;
-  background: white;
-  border: 1px solid #ccc;
-  border-radius: 999px;
-  padding: 8px 12px;
-  font-size: 14px;
-  box-shadow: 0 2px 6px rgba(0,0,0,.25);
-}
+    /* Mobiili: lista piiloon oletuksena, avataan napista */
+    @media (max-width: 768px) {
+      #app {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr;
+      }
+      #sidebar {
+        max-height: 45vh;
+        border-right: none;
+        border-bottom: 1px solid #ddd;
+        display: none;
+      }
+      #sidebar.open {
+        display: block;
+      }
+      #map {
+        height: 100vh;
+      }
+    }
 
-/* iPhone notch -ystävällinen */
-@supports (padding: env(safe-area-inset-top)) {
-  #mobileToggle { top: calc(env(safe-area-inset-top) + 12px); }
-}
+    /* Leaflet-toggle-napin tyylit */
+    .leaflet-control .sauna-toggle-btn {
+      background: white;
+      border: 1px solid #ccc;
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: 14px;
+      box-shadow: 0 2px 6px rgba(0,0,0,.25);
+      cursor: pointer;
+      line-height: 1;
+    }
 
-</style>
+    /* iPhone notch -ystävällinen: pieni lisämarginaali yläreunaan */
+    @supports (padding: env(safe-area-inset-top)) {
+      .leaflet-top.leaflet-right { margin-top: env(safe-area-inset-top); }
+      .leaflet-top.leaflet-left  { margin-top: env(safe-area-inset-top); }
+    }
+  </style>
 </head>
 <body>
 <div id="app">
@@ -114,9 +109,8 @@
       Vinkki: Koordinaatit tallennetaan selaimen localStorageen, joten seuraava avaus on nopeampi.
     </div>
   </div>
-  
-<button id="mobileToggle">📋 Näytä lista</button>
-<div id="map"></div>
+
+  <div id="map"></div>
 </div>
 
 <script
@@ -126,10 +120,12 @@
 ></script>
 
 <script>
+/* HUOM: pidin sinun SAUNAS-datan ennallaan (tähän voi liittää koko listan).
+   Alla on vain lyhyt esimerkki—VAIHDA tämä sinun täydellä SAUNAS-arraylläsi. */
 const SAUNAS = [{"rank": "74", "name": "Järvenkylän sauna", "municipality": "Hämeenkyrö", "address": "Vesajärventie 247, Hämeenkyrö", "points": 25.0, "open": "kesäisin kesäkahvion aukioloaikojen mukaan. Aiempina kesinä ma–pe 12–20, la–su 12–14/16 (säävaraus)", "price": "ilmainen", "details": "Löylyt 10/25, miljöö 3/4, ilmapiiri 2/3, suihku- ja pukuhuoneet 1/3, saunavaihtoehdot 1/3, oheispalvelut 2/3, aukioloajat 2/3, hinta 3/3, saavutettavuus 1/3."}, {"rank": "73", "name": "Niihaman lenkkisauna", "municipality": "Tampere", "address": "Pikku-Niihamantie 98, Tampere", "points": 28.0, "open": "sekasauna naisille ja miehille ti ja to 16–19", "price": "8 €", "details": "Löylyt 16/25, miljöö 2/4, ilmapiiri 2/3, suihku- ja pukuhuoneet 1/3, saunavaihtoehdot 1/3, oheispalvelut 2/3, aukioloajat 1/3, hinta 2/3, saavutettavuus 1/3."}, {"rank": "72", "name": "Vohlisaaren rantasauna", "municipality": "Luopioinen", "address": "Vohlisaarentie 28, Pälkäne", "points": 28.0, "open": "talvikaudella lokakuusta alkaen ma ja to 17–21. Talvikausi päättyi huhtikuun puolivälissä 2025.", "price": "2,90€", "details": "Löylyt 16/25, miljöö 2/4, ilmapiiri 2/3, suihku- ja pukuhuoneet 1/3, saunavaihtoehdot 1/3, oheispalvelut 1/3, aukioloajat 1/3, hinta 3/3, saavutettavuus 1/3."}, {"rank": "71", "name": "Kiviojan Helmi", "municipality": "Tampere", "address": "Velaatantie 1073, Tampere", "points": 28.0, "open": "Joka toinen torstai loppiaisesta 2024 alkaen huhti-toukokuulle asti.", "price": "10€ (pakollinen ajanvaraus)", "details": "Löylyt 18/25, miljöö 2/4, ilmapiiri 2/3, suihku- ja pukuhuoneet 1/3, saunavaihtoehdot 1/3, oheispalvelut 1/3, aukioloajat 1/3, hinta 1/3, saavutettavuus 1/3."}, {"rank": "70", "name": "Paijalan sauna", "municipality": "Ylöjärvi", "address": "Paijalantie, Ylöjärvi (Viljakkala)", "points": 29.0, "open": "kesälauantaisin 15–18.", "price": "20€ (kausimaksu)", "details": "Löylyt 14/25, miljöö 3/4, ilmapiiri 3/3, suihku- ja pukuhuoneet 1/3, saunavaihtoehdot 1/3, oheispalvelut 1/3, aukioloajat 1/3, hinta 3/3, saavutettavuus 2/3."}, {"rank": "69", "name": "Lempoinen", "municipality": "Lempäälä", "address": "Nokkatie 5, Lempäälä", "points": 29.0, "open": "Lempäälän Kisan vuorot talvikaudella tiistaisin ja torstaisin klo 16–21.30 ja sunnuntaisin klo 15–21.30, lisäksi Lempo-Volleyn ylläpitämä vuoro keskiviikkoisin 16–21.", "price": "kausimaksu 80€, ke 6€", "details": "Löylyt 14/25, miljöö 2/4, ilmapiiri 2/3, suihku- ja pukuhuoneet 2/3, saunavaihtoehdot 1/3, oheispalvelut 1/3, aukioloajat 2/3, hinta 3/3, saavutettavuus 2/3."}, {"rank": "68", "name": "Tampereen Pursiseuran avantosauna", "municipality": "Tampere", "address": "Tampereen Pursiseura, Kekkosenkatu 10, Tampere", "points": 29.0, "open": "ennakkovarauksella pe–la 16–21", "price": "nan", "details": "Löylyt 18/25, miljöö 2/4, ilmapiiri 2/3, suihku- ja pukuhuoneet 1/3, saunavaihtoehdot 1/3, oheispalvelut 1/3, aukioloajat 1/3, hinta 1/3, saavutettavuus 2/3."}, {"rank": "67", "name": "Pihlapirtti", "municipality": "Ruovesi", "address": "Vasikkaniementie 1, Ruovesi", "points": 30.0, "open": "talviuinti lokakuun puolivälistä ti ja to 16–20.", "price": "8€, jäsenille 5€.", "details": "Löylyt 17/25, miljöö 2/4, ilmapiiri 2/3, suihku- ja pukuhuoneet 1/3, saunavaihtoehdot 1/3, oheispalvelut 1/3, aukioloajat 2/3, hinta 2/3, saavutettavuus 2/3."}, {"rank": "66", "name": "Viikinsaari", "municipality": "Tampere", "address": "Viikinsaari, Tampere", "points": 30.0, "open": "la 16–20 ja su 15–18 (tarkista poikkeukset viikinsaari.fi/rantasauna)", "price": "7€", "details": "Löylyt 16/25, miljöö 2/4, ilmapiiri 3/3, suihku- ja pukuhuoneet 1/3, saunavaihtoehdot 1/3, oheispalvelut 2/3, aukioloajat 2/3, hinta 2/3, saavutettavuus 1/3."}, {"rank": "65", "name": "Näsirinteen sauna", "municipality": "Ylöjärvi", "address": "Rauhalan yksityistie 44, Ylöjärvi", "points": 30.0, "open": "toistaiseksi tilauskäytössä.", "price": "6€", "details": "Löylyt 16/20, miljöö 2/4, ilmapiiri 2/3, suihku- ja pukuhuoneet 2/3, saunavaihtoehdot 1/3, oheispalvelut 1/3, aukioloajat 3/3, hinta 2/3, saavutettavuus 1/3."}, {"rank": "64", "name": "Kämmenniemen sauna", "municipality": "Tampere", "address": "Niemisennokantie 42, Tampere", "points": 30.0, "open": "ke 18–.", "price": "kausimaksu 50€.", "details": "Löylyt 17/25, miljöö 2/4, ilmapiiri 3/3, suihku- ja pukuhuoneet 1/3, saunavaihtoehdot 1/3, oheispalvelut 1/3, aukioloajat 1/3, hinta 3/3, saavutettavuus 1/3."}, {"rank": "63", "name": "Kankahuven rantasauna", "municipality": "Pälkäne", "address": "Kankahuventie 79, Aitoo", "points": 30.0, "open": "ti 18–21", "price": "2,90 € (laskutetaan kauden päätteeksi)", "details": "Löylyt 18/25, miljöö 2/4, ilmapiiri 2/3, suihku- ja pukuhuoneet 1/3, saunavaihtoehdot 1/3, oheispalvelut 1/3, aukioloajat 1/3, hinta 3/3, saavutettavuus 1/3."}, {"rank": "62", "name": "Tehdassaaren elämyssauna", "municipality": "Nokia", "address": "Souranderintie 2, Nokia", "points": 31.0, "open": "muuttunut tilaussaunaksi, ei enää yleisiä vuoroja.", "price": "kertamaksu 7€, jäsenille 5€", "details": "Löylyt 17/25, miljöö 2/4, ilmapiiri 2/3, oheistilat 2/3, saunavaihtoehdot 1/3, oheispalvelut 2/3, aukioloajat 1/3, hinta 2/3, saavutettavuus 2/3."}, {"rank": "61", "name": "Eräjärven avantosauna", "municipality": "Orivesi", "address": "Eräjärventie 1500, Orivesi", "points": 31.0, "open": "la 13–17 vappuun asti.", "price": "5€", "details": "Löylyt 17/25, miljöö 2/4, ilmapiiri 3/3, suihku- ja pukuhuoneet 1/3, saunavaihtoehdot 1/3, oheispalvelut 1/3, aukioloajat 1/3, hinta 3/3, saavutettavuus 2/3."}, {"rank": "60", "name": "Toijalan satama", "municipality": "Akaa", "address": "Kangassaarentie 14, Akaa", "points": 31.0, "open": "vapusta 2025 alkaen to–la 14–18.", "price": "talvikausi 50€, opiskelija, eläkeläinen ja työtön 25€, kesällä 6€/kerta.", "details": "Löylyt 17/25, miljöö 2/4, ilmapiiri 2/3, suihku- ja pukuhuoneet 2/3, saunavaihtoehdot 1/3, oheispalvelut 1/3, aukioloajat 2/3, hinta 3/3, saavutettavuus 1/3."}, {"rank": "58", "name": "Rantaterassin sauna", "municipality": "Virrat", "address": "Pohjolantie 5, Virrat", "points": 31.0, "open": "talvikaudella ma ja ke klo 17–21 sekä pe klo 16–21.", "price": "6,50€ (jäsenet 5€)", "details": "Löylyt 16/25, miljöö 2/4, ilmapiiri 3/3, suihku- ja pukuhuoneet 1/3, saunavaihtoehdot 1/3, oheispalvelut 1/3, aukioloajat 2/3, hinta 3/3, saavutettavuus 2/3."}, {"rank": "57", "name": "Arajärvi", "municipality": "Viiala", "address": "Arajärventie 603, Viiala (Akaa)", "points": 32.0, "open": "nykyään tilauskäytössä.", "price": "kausimaksu 30€, eläkeläinen 15€, kertamaksu 2€", "details": "Löylyt 19/25, miljöö 2/4, ilmapiiri 2/3, suihku- ja pukuhuoneet 1/3, saunavaihtoehdot 1/3, oheispalvelut 1/3, aukioloajat 2/3, hinta 3/3, saavutettavuus 1/3."}, {"rank": "56", "name": "Särkijärvi", "municipality": "Vesilahti", "address": "Punkalaitumentie 474, Vesilahti", "points": 32.0, "open": "ke 17–21", "price": "kausimaksu 30€ (kevät 2020)", "details": "Löylyt 19/25, miljöö 2/4, ilmapiiri 3/3, suihku- ja pukuhuoneet 1/3, saunavaihtoehdot 1/3, oheispalvelut 1/3, aukioloajat 1/3, hinta 3/3, saavutettavuus 1/3."}, {"rank": "55", "name": "Kiimajärven rantasauna", "municipality": "Sastamala", "address": "Pohjanmaantie 981, Sastamala", "points": 32.0, "open": "talvikaudella to 17–20, su 15–19, talvikausi päättyi pääsiäisenä 2025. Kesällä koulujen loma-aikana ti, ke ja to 15–20.", "price": "3€", "details": "Löylyt 19/25, miljöö 2/4, ilmapiiri 2/3, suihku- ja pukuhuoneet 1/3, saunavaihtoehdot 1/3, oheispalvelut 2/3, aukioloajat 1/3, hinta 3/3, saavutettavuus 1/3."}, {"rank": "54", "name": "Rantala", "municipality": "Lempäälä", "address": "Ruodasjärventie 50, Lempäälä", "points": 32.0, "open": "Talvikaudella Lempo-Volleyn ylläpitämä vuoro ennakkovarauksella ma 17–21, lisäksi Lempäälän Kisan järjestämät vuorot tiistaisin, torstaisin ja sunnuntaisin klo 16.30–20.30 sekä sunnuntaisin klo 15–21.30.", "price": "talviuintimaksu 80 € (loppuunmyyty talvikaudelle 2023–2024), maanantain vuoro 6€", "details": "Löylyt 19/25, miljöö 2/4, ilmapiiri 1/3, suihku- ja pukuhuoneet 2/3, saunavaihtoehdot 1/3, oheispalvelut 1/3, aukioloajat 2/3, hinta 3/3, saavutettavuus 1/3."}, {"rank": "53", "name": "Saunalautta M/S Laine", "municipality": "Tampere", "address": "Sahansaarenkatu, Santalahden satama, Tampere", "points": 32.0, "open": "to 16–21.", "price": "10€", "details": "Löylyt 19/25, miljöö 3/4, ilmapiiri 2/3, suihku- ja pukuhuoneet 1/3, saunavaihtoehdot 1/3, oheispalvelut 2/3, aukioloajat 1/3, hinta 1/3, saavutettavuus 2/3."}, {"rank": "52", "name": "Lammasniemen sauna", "municipality": "Vesilahti", "address": "Lammasniementie 70, Vesilahti", "points": 32.0, "open": "marraskuun 2024 alusta maaliskuun 2025 loppuun ti 17–20.", "price": "5€", "details": "Löylyt 18/25, miljöö 2/4, ilmapiiri 2/3, suihku- ja pukuhuoneet 2/3, saunavaihtoehdot 1/3, oheispalvelut 1/3, aukioloajat 1/3, hinta 3/3, saavutettavuus 2/3."}, {"rank": "51", "name": "Jyrmysjärven avantosauna", "municipality": "Suodenniemi", "address": "Suodenniementie 23, Sastamala", "points": 33.0, "open": "ke 16–19", "price": "6€", "details": "Löylyt 19/25, miljöö 2/4, ilmapiiri 3/3, suihku- ja pukuhuoneet 1/3, saunavaihtoehdot 1/3, oheispalvelut 1/3, aukioloajat 1/3, hinta 3/3, saavutettavuus 2/3."}, {"rank": "49", "name": "Kurjenrannan sauna", "municipality": "Viljakkala", "address": "Kurjentie, Viljakkala", "points": 33.0, "open": "kesällä 2023 ke 17–20.", "price": "syksyn kausimaksu 30€", "details": "Löylyt 17/25, miljöö 3/4, ilmapiiri 3/3, suihku- ja pukuhuoneet 1/3, saunavaihtoehdot 1/3, oheispalvelut 2/3, aukioloajat 1/3, hinta 3/3, saavutettavuus 2/3."}, {"rank": "48", "name": "Hirsilinna", "municipality": "Kuru", "address": "Hevossaarentie 91, Kuru", "points": 33.0, "open": "avantouinti talvisin ke ja su klo 17–19.30.", "price": "2€", "details": "Löylyt 19/25, miljöö 2/4, ilmapiiri 3/3, suihku- ja pukuhuoneet 1/3, saunavaihtoehdot 1/3, oheispalvelut 1/3, aukioloajat 1/3, hinta 3/3, saavutettavuus 2/3."}, {"rank": "47", "name": "Lavajärven Leirirannan sauna", "municipality": "Hämeenkyrö", "address": "Komintie 476, Hämeenkyrö", "points": 33.0, "open": "kesäisin pääasiassa parittomien viikkojen torstaina 18–20. Kesäkausi päättyy elokuun lopussa.", "price": "2 €", "details": "Löylyt 20/25, miljöö 2/4, ilmapiiri 3/3, suihku- ja pukuhuoneet 1/3, saunavaihtoehdot 1/3, oheispalvelut 1/3, aukioloajat 1/3, hinta 3/3, saavutettavuus 1/3."}, {"rank": "46", "name": "Pappilanniemen sauna", "municipality": "Sääksmäki", "address": "Pappilanniemen kurssikeskus, Pappilanniemi 51, Sääksmäki", "points": 33.0, "open": "talvikaudella maanantaisin naiset 17–19, miehet 19–21.", "price": "ilmainen", "details": "Löylyt 18/25, miljöö 3/4, ilmapiiri 3/3, suihku- ja pukuhuoneet 2/3, saunavaihtoehdot 1/3, oheispalvelut 1/3, aukioloajat 1/3, hinta 3/3, saavutettavuus 1/3."}, {"rank": "45", "name": "Reippi", "municipality": "Pirkkala", "address": "Reipintie 43, Pirkkala", "points": 33.0, "open": "talvikaudella ma 17–20, ke 17–20, la 14–18, kesällä ti–pe 14–20, la–su 14–18", "price": "aikuiset 6€, lapset 2€ (ikäraja 15 v.)", "details": "Löylyt 18/25, miljöö 2/4, ilmapiiri 2/3, suihku- ja pukuhuoneet 1/3, saunavaihtoehdot 1/3, oheispalvelut 2/3, aukioloajat 2/3, hinta 3/3, saavutettavuus 2/3."}, {"rank": "44", "name": "Vesaniemi", "municipality": "Kangasala", "address": "Vesaniementie 15, Kangasala", "points": 33.0, "open": "talviuintikausi 9. syyskuuta 2024 alkaen kello 17–21 ensin ma ja pe, lokakuusta alkaen ma, ke, to ja pe, tammi-maaliskuussa myös su. Kausi päättyy 16.5.2025.", "price": "aikuiset 7€, alle 12-vuotiaat maksutta", "details": "Löylyt 16/25, miljöö 3/4, ilmapiiri 2/3, suihku- ja pukuhuoneet 3/3, saunavaihtoehdot 1/3, oheispalvelut 1/3, aukioloajat 3/3, hinta 2/3, saavutettavuus 2/3."}, {"rank": "43", "name": "Käenkoski", "municipality": "Parkano", "address": "Hiihtokeskuksentie 35, Parkano", "points": 34.0, "open": "talvikaudella to 17.30–21, su 16.30–20. Talvikausi päättyy vappuun.", "price": "nan", "details": "Löylyt 19/25, miljöö 2/4, ilmapiiri 3/3, suihku- ja pukuhuoneet 1/3, saunavaihtoehdot 1/3, oheispalvelut 2/3, aukioloajat 2/3, hinta 3/3, saavutettavuus 1/3."}, {"rank": "42", "name": "Rajalansaaren savusauna", "municipality": "Luopioinen", "address": "Rajalansaari, Luopioinen (opastus rantaan Kesäkehräntien P-alueelta)", "points": 34.0, "open": "aiempina kesinä ke 18–21.30.", "price": "5€", "details": "Löylyt 20/25, miljöö 3/4, ilmapiiri 2/3, suihku- ja pukuhuoneet 1/3, saunavaihtoehdot 1/3, oheispalvelut 1/3, aukioloajat 1/3, hinta 3/3, saavutettavuus 2/3."}, {"rank": "41", "name": "Kostianvirran sauna", "municipality": "Pälkäne", "address": "Veteraanipolku 1, Pälkäne", "points": 34.0, "open": "lokakuusta huhtikuuhun ma ja to 16–21, kesällä ma ja pe 18–22.", "price": "vuosimaksu 60 euroa.", "details": "Löylyt 20/25, miljöö 2/4, ilmapiiri 3/3, suihku- ja pukuhuoneet 1/3, saunavaihtoehdot 1/3, oheispalvelut 1/3, aukioloajat 1/3, hinta 3/3, saavutettavuus 2/3."}, {"rank": "40", "name": "Flou Sauna Ravintola", "municipality": "Tampere", "address": "Ratinan rantatie 6, Tampere (talvisin Rosendahlin laituri, Jalkasaarentie 7, Tampere)", "points": 34.0, "open": "kesäkaudella Ratinassa ke–pe 16–22, la–su 8–22, talvikaudella 13.10.2025 alkaen Rosendahlin rannassa ma–pe 15–21, la–su 8–21.", "price": "15€.", "details": "Löylyt 16/25, miljöö 3/4, ilmapiiri 2/3, suihku- ja pukuhuoneet 2/3, saunavaihtoehdot 1/3, oheispalvelut 3/3, aukioloajat 3/3, hinta 1/3, saavutettavuus 3/3."}, {"rank": "39", "name": "Tehdasaukion sauna", "municipality": "Tampere", "address": "Tehdaskartanonkatu 38, Tampere", "points": 35.0, "open": "10. toukokuuta 2025 alkaen pe–su 15–19.", "price": "8€", "details": "Löylyt 21/25, miljöö 2/4, ilmapiiri 2/3, suihku- ja pukuhuoneet 1/3, saunavaihtoehdot 1/3, oheispalvelut 2/3, aukioloajat 2/3, hinta 2/3, saavutettavuus 2/3."}, {"rank": "38", "name": "Halkoniemi", "municipality": "Nokia", "address": "Ojanteentie 16, Nokia", "points": 35.0, "open": "talvikaudella syyskuun alusta lähtien ti 16–23, ke 16–22, to 16–23, pe 17–23.30 (savusauna vain jäsenille), la 14–22, su 14–22.", "price": "kertamaksu aikuiset 8€, kertamaksu alle 15-v. 2 €", "details": "Löylyt 20/25, miljöö 3/4, ilmapiiri 2/3, suihku- ja pukuhuoneet 1/3, saunavaihtoehdot 1/3, oheispalvelut 1/3, aukioloajat 3/3, hinta 2/3, saavutettavuus 2/3."}, {"rank": "37", "name": "Taidesauna", "municipality": "Mänttä", "address": "Joenniementie 47, Mänttä", "points": 35.0, "open": "ympäri vuoden ti 13–19.", "price": "14 euroa", "details": "Löylyt 18/25, miljöö 4/4, ilmapiiri 2/3, suihku- ja pukuhuoneet 3/3, saunavaihtoehdot 1/3, oheispalvelut 3/3, aukioloajat 1/3, hinta 1/3, saavutettavuus 2/3."}, {"rank": "36", "name": "Urkin piilopirtti", "municipality": "Hämeenkyrö", "address": "Sasintie 440, Pinsiö", "points": 35.0, "open": "heinäkuussa perjantaisin kello 16–21.", "price": "16€", "details": "Löylyt 20/25, miljöö 3/4, ilmapiiri 2/3, suihku- ja pukuhuoneet 2/3, saunavaihtoehdot 2/3, oheispalvelut 3/3, aukioloajat 1/3, hinta 1/3, saavutettavuus 1/3."}, {"rank": "35", "name": "Vanhan pappilan sauna", "municipality": "Lempäälä", "address": "Rovastintie 3, Lempäälä", "points": 35.0, "open": "tiistaisin naisten kesäsauna 18–21, torstaisin miesten kesäsauna 17.30–20.", "price": "0€", "details": "Löylyt 19/25, miljöö 3/4, ilmapiiri 3/3, suihku- ja pukuhuoneet 2/3, saunavaihtoehdot 1/3, oheispalvelut 1/3, aukioloajat 1/3, hinta 3/3, saavutettavuus 2/3."}, {"rank": "34", "name": "Säynäniemi", "municipality": "Orivesi", "address": "Säynäniementie 100, Orivesi", "points": 35.0, "open": "ke naiset 17–18.30, miehet 18.30–20, la naiset 18–19.30, miehet 19.30–21.", "price": "5€", "details": "Löylyt 20/25, miljöö 2/4, ilmapiiri 3/3, suihku- ja pukuhuoneet 2/3, saunavaihtoehdot 1/3, oheispalvelut 1/3, aukioloajat 2/3, hinta 3/3, saavutettavuus 1/3."}, {"rank": "33", "name": "Pihlajaniemen sauna", "municipality": "Pirkkala", "address": "Pappilantie 63, Pirkkala", "points": 35.0, "open": "miehet ti 17.30–20, naiset ke 17.30–20.", "price": "vapaaehtoinen maksu lähetystyön hyväksi 5€", "details": "Löylyt 20/25, miljöö 3/4, ilmapiiri 3/3, suihku- ja pukuhuoneet 2/3, saunavaihtoehdot 1/3, oheispalvelut 1/3, aukioloajat 1/3, hinta 3/3, saavutettavuus 1/3."}, {"rank": "32", "name": "Mäyriän sauna", "municipality": "Lempäälä", "address": "Vanha Rantatie 105, Lempäälä", "points": 35.0, "open": "suljettu lokakuussa 2023.", "price": "2€", "details": "Löylyt 19/25, miljöö 3/4, ilmapiiri 3/3, suihku- ja pukuhuoneet 2/3, saunavaihtoehdot 1/3, oheispalvelut 1/3, aukioloajat 2/3, hinta 3/3, saavutettavuus 1/3."}, {"rank": "31", "name": "Hauralan avantosauna", "municipality": "Lempäälä", "address": "Hauralantie 200, Lempäälä", "points": 35.0, "open": "toiminta päättyi maaliskuun 2023 puolivälissä.", "price": "8€", "details": "Löylyt 21/25, miljöö 3/4, ilmapiiri 2/3, suihku- ja pukuhuoneet 1/3, saunavaihtoehdot 2/3, oheispalvelut 2/3, aukioloajat 2/3, hinta 1/3, saavutettavuus 1/3."}, {"rank": "30", "name": "Haihunkosken sauna", "municipality": "Viiala", "address": "Rautatienkatu 24, Akaa", "points": 35.0, "open": "naiset ke 17–19, miehet to 17–19", "price": "8€", "details": "Löylyt 21/25, miljöö 2/4, ilmapiiri 2/3, suihku- ja pukuhuoneet 1/3, saunavaihtoehdot 1/3, oheispalvelut 2/3, aukioloajat 1/3, hinta 2/3, saavutettavuus 3/3."}, {"rank": "29", "name": "Kesäpirtti", "municipality": "Ylöjärvi", "address": "Kesäpirtintie 48, Ylöjärvi", "points": 35.0, "open": "kesäisin ma–ti miehet 18.30–20, naiset 20–21.30, ke–to naiset 18.30–20, miehet 20–21.30, pe miehet 18.30–20, naiset 20–21.30, la naiset 16.30–18.30, miehet 18.30–20.30, su miehet 16.30–18, naiset 18–19.30. Kesän 2025 kausi on päättynyt elokuun lopussa.", "price": "6€", "details": "Löylyt 19/25, miljöö 3/4, ilmapiiri 3/3, suihku- ja pukuhuoneet 1/3, saunavaihtoehdot 1/3, oheispalvelut 1/3, aukioloajat 3/3, hinta 3/3, saavutettavuus 1/3."}, {"rank": "28", "name": "Ikaalisten kylpylän rantasauna", "municipality": "Ikaalinen", "address": "Huvilatie 2, Ikaalinen", "points": 36.0, "open": "9. toukokuuta 2025 alkaen pe 16–20 ja la 16–19, 13. kesäkuuta alkaen ti–ke 16–20, pe 15–20, la 15–19 ja 15. elokuuta alkaen syyskuun lopulle asti pe 15–20 ja la 15–19.", "price": "8€", "details": "Löylyt 18/25, miljöö 3/4, ilmapiiri 3/3, suihku- ja pukuhuoneet 1/3, saunavaihtoehdot 1/3, oheispalvelut 3/3, aukioloajat 3/3, hinta 2/3, saavutettavuus 2/3"}, {"rank": "27", "name": "Aurajärven rantasauna", "municipality": "Sastamala", "address": "Aurajärventie 757, Sastamala", "points": 36.0, "open": "juhannuksesta alkaen ma–pe 14–20.", "price": "2€", "details": "Löylyt 19/25, miljöö 3/4, ilmapiiri 2/3, suihku- ja pukuhuoneet 2/3, saunavaihtoehdot 1/3, oheispalvelut 2/3, aukioloajat 3/3, hinta 3/3, saavutettavuus 1/3."}, {"rank": "26", "name": "Apia", "municipality": "Valkeakoski", "address": "Saunapolku 7, Valkeakoski", "points": 36.0, "open": "lokakuun alusta huhtikuun loppuun ti, to ja pe 14–21, la ja su 11–20.", "price": "kertamaksu 8€, kertamaksu jäsenille 4€, syyskausikortti jäsenille 60€ ja kevätkortti 80€.", "details": "Löylyt 20/25, miljöö 3/4, ilmapiiri 3/3, suihku- ja pukuhuoneet 1/3, saunavaihtoehdot 1/3, oheispalvelut 1/3, aukioloajat 3/3, hinta 2/3, saavutettavuus 2/3."}, {"rank": "25", "name": "Peronsaaren sauna", "municipality": "Ylöjärvi", "address": "Peronsaari, Ylöjärvi", "points": 36.0, "open": "kesäkaudella ke ja la.", "price": "7€, lapset 3€", "details": "Löylyt 22/25, miljöö 4/4, ilmapiiri 3/3, suihku- ja pukuhuoneet 1/3, saunavaihtoehdot 1/3, oheispalvelut 1/3, aukioloajat 1/3, hinta 2/3, saavutettavuus 1/3."}, {"rank": "24", "name": "Kiikoisten rantasauna", "municipality": "Sastamala", "address": "Rajalahdentie 45, Sastamala", "points": 36.0, "open": "talvikaudella huhtikuun loppuun asti ke, pe ja su 16–20, kesällä elokuun loppuun asti ti, to ja su 16.30–20", "price": "3€", "details": "Löylyt 18/25, miljöö 4/4, ilmapiiri 3/3, suihku- ja pukuhuoneet 3/3, saunavaihtoehdot 1/3, oheispalvelut 2/3, aukioloajat 1/3, hinta 3/3, saavutettavuus 1/3."}, {"rank": "23", "name": "Räikkä", "municipality": "Ylöjärvi", "address": "Kuruntie 14, Ylöjärvi", "points": 36.0, "open": "2025 syyskuun alusta alkaen ma, ke ja to 12–20, la 11–20. Kausi päättyy toukokuussa.", "price": "aikuiset 5€, alle 15 v. 2 €, alle 7-vuotiaat maksutta", "details": "Löylyt 20/25, miljöö 2/4, ilmapiiri 3/3, suihku- ja pukuhuoneet 2/3, saunavaihtoehdot 1/3, oheispalvelut 1/3, aukioloajat 2/3, hinta 3/3, saavutettavuus 2/3."}, {"rank": "22", "name": "Peltomäki", "municipality": "Ylöjärvi", "address": "Säynäväjärventie 38, Ylöjärvi", "points": 36.0, "open": "Yrittäjä on lopettanut toimintansa kauden 2023 jälkeen, jatkosta ei tietoa.", "price": "10€", "details": "Löylyt 23/25, miljöö 2/4, ilmapiiri 2/3, suihku- ja pukuhuoneet 1/3, saunavaihtoehdot 3/3, oheispalvelut 2/3, aukioloajat 1/3, hinta 1/3, saavutettavuus 1/3."}, {"rank": "21", "name": "Tursan savusauna", "municipality": "Urjala", "address": "Nuutajärventie 1335A, Urjala", "points": 36.0, "open": "Kesälauantaisin kello 17 alkaen. Tarkista aukiolo Suvilammen matkaparkin Facebook-sivuilta.", "price": "9€", "details": "Löylyt 24/25, miljöö 2/4, ilmapiiri 3/3, suihku- ja pukuhuoneet 1/3, saunavaihtoehdot 1/3, oheispalvelut 2/3, aukioloajat 1/3, hinta 1/3, saavutettavuus 1/3."}, {"rank": "20", "name": "Saunatemppeli", "municipality": "Tampere", "address": "Rauhaniementie 23B, Tampere", "points": 36.0, "open": "ma–pe 17–21, la–su 16–22.", "price": "Aikuiset 11€, Rauhaniemen saunojen lisänä 6€:n lisämaksu.", "details": "Löylyt 20/25, miljöö 4/4, ilmapiiri 2/3, suihku- ja pukuhuoneet 2/3, saunavaihtoehdot 1/3, oheispalvelut 1/3, aukioloajat 2/3, hinta 1/3, saavutettavuus 3/3."}, {"rank": "19", "name": "Suomensaari", "municipality": "Tampere", "address": "Suomensaarenkatu 9, Tampere", "points": 36.0, "open": "talvikaudella ma ja ke 16–20, pe 16–21, la 14–18, su 15–19, kesällä ma ja ke 17–21, pe 18–22, la 16–19", "price": "aikuiset (yli 16-v.) 10 €, eläkeläiset ja opiskelijat 7 €, lapset (6–15 v.) 5 €", "details": "Löylyt 20/25, miljöö 3/4, ilmapiiri 3/3, suihku- ja pukuhuoneet 2/3, saunavaihtoehdot 1/3, oheispalvelut 2/3, aukioloajat 2/3, hinta 1/3, saavutettavuus 2/3."}, {"rank": "18", "name": "Purnun savusauna", "municipality": "Orivesi", "address": "Mustasaari 63, Orivesi", "points": 37.0, "open": "kesäkaudella 15.6.2025 alkaen naiset ma 14–15.30, miehet 15.30–17, ke miehet 14–15.30, naiset 15.30–17 ja pe naiset 14–15.30, miehet 15.30–17. Kausi päättyy 10. elokuuta.", "price": "15€ (sisältää taidenäyttelyn)", "details": "Löylyt 24/25, miljöö 3/4, ilmapiiri 3/3, suihku- ja pukuhuoneet 1/3, saunavaihtoehdot 1/3, oheispalvelut 2/3, aukioloajat 1/3, hinta 1/3, saavutettavuus 1/3."}, {"rank": "17", "name": "Laawu Rooftop Terrace & Sauna", "municipality": "Tampere", "address": "Lapland Hotels Arena, Ratapihankatu 54, Tampere (12. kerros)", "points": 37.0, "open": "ma–su 16–22, lisäksi aamusauna la–su 8–11.", "price": "15€", "details": "Löylyt 19/25, miljöö 3/4, ilmapiiri 2/3, suihku- ja pukuhuoneet 3/3, saunavaihtoehdot 1/3, oheispalvelut 2/3, aukioloajat 3/3, hinta 1/3, saavutettavuus 3/3."}, {"rank": "15", "name": "Rajaportti", "municipality": "Tampere", "address": "Pispalan valtatie 9, Tampere", "points": 38.0, "open": "ma ja ke 16–22, pe ja la 14–22", "price": "ma ja ke 8€, pe ja la 12€.", "details": "Löylyt 23/25, miljöö 2/4, ilmapiiri 1/3, suihku- ja pukuhuoneet 1/3, saunavaihtoehdot 1/3, oheispalvelut 3/3, aukioloajat 2/3, hinta 2/3, saavutettavuus 3/3."}, {"rank": "14", "name": "Kuuma", "municipality": "Laukontorin paviljonki, Tampere", "address": "Laukontori 21, Tampere", "points": 38.0, "open": "ma 11–22, ti 6–10.30 ja 11–22, ke–pe 6–10.30 ja 11–23, la 12–23, su 15–21. Aamusaunat vain talvikaudella vappuun asti.", "price": "12–17€.", "details": "Löylyt 19/25, miljöö 3/4, ilmapiiri 2/3, suihku- ja pukuhuoneet 2/3, saunavaihtoehdot 2/3, oheispalvelut 3/3, aukioloajat 3/3, hinta 1/3, saavutettavuus 3/3."}, {"rank": "13", "name": "Tohloppi", "municipality": "Tampere", "address": "Pyydyspohjankatu 1, Tampere", "points": 38.0, "open": "ti–pe 17.30–21, la 16–19 (huhtikuun 2025 loppuun asti), su 17.30–21.", "price": "aikuiset 6€, jäsenille 4€", "details": "Löylyt 22/25, miljöö 3/4, ilmapiiri 2/3, suihku- ja pukuhuoneet 1/3, saunavaihtoehdot 1/3, oheispalvelut 1/3, aukioloajat 3/3, hinta 3/3, saavutettavuus 2/3."}, {"rank": "12", "name": "Nekalan siirtolapuutarhan sauna", "municipality": "Tampere", "address": "Muotialantie 43, Tampere", "points": 38.0, "open": "kesä–elokuussa ke ja la 16–20, touko- ja syyskuussa vain la 16–20.", "price": "5€", "details": "Löylyt 23/25, miljöö 2/4, ilmapiiri 2/3, suihku- ja pukuhuoneet 2/3, saunavaihtoehdot 1/3, oheispalvelut 1/3, aukioloajat 1/3, hinta 3/3, saavutettavuus 3/3."}, {"rank": "11", "name": "Suolijärvi", "municipality": "Tampere", "address": "Suolijärvenkatu 5, Tampere", "points": 38.0, "open": "talvikaudella ti 16.25–20.45 (ei toukokuussa), ke 16.25–20.45, to 16.25–20.45 (ei toukokuussa), pe 16.25–20.45, la 13.25–17.45 (ei toukokuussa), su 13.25–18.45, talvikausi päättyy 11.5.2025.", "price": "Aikuiset 8€, lapset alle 12-v. 4 €, opiskelijat ja eläkeläiset 6 €", "details": "Löylyt 21/25, miljöö 3/4, ilmapiiri 2/3, suihku- ja pukuhuoneet 1/3, saunavaihtoehdot 2/3, oheispalvelut 1/3, aukioloajat 3/3, hinta 2/3, saavutettavuus 3/3."}, {"rank": "10", "name": "Alisniemi", "municipality": "Nokia", "address": "Porintie 584, Nokia", "points": 38.0, "open": "ke ja pe 15–21.30, su 13–21.30.", "price": "vierailijat 7€, jäsenet 6€, alle 12-v. 2€", "details": "Löylyt 23/25, miljöö 3/4, ilmapiiri 2/3, suihku- ja pukuhuoneet 1/3, saunavaihtoehdot 1/3, oheispalvelut 3/3, aukioloajat 2/3, hinta 2/3, saavutettavuus 1/3."}, {"rank": "9", "name": "Pereensaaren sauna", "municipality": "Pirkkala", "address": "Pereensaarentie 43, Pirkkala", "points": 38.0, "open": "ma–pe 16–22, su 14–22.", "price": "arkisin 14€, viikonloppuna 16€ (ei käteismaksua)", "details": "Löylyt 19/25, miljöö 4/4, ilmapiiri 2/3, oheistilat 3/3, saunavaihtoehdot 1/3, oheispalvelut 3/3, aukioloajat 3/3, hinta 1/3, saavutettavuus 2/3."}, {"rank": "8", "name": "Tahmelan huvilan sauna", "municipality": "Tampere", "address": "Uramonkatu 9, Tampere", "points": 39.0, "open": "ti 15–20 (sekavuoro), to 15–18 (sekavuoro) ja 18–20 (naisten vuoro), su 14–20 (sekavuoro).", "price": "arkisin 8€, su 12€", "details": "Löylyt 21/25, miljöö 2/4, ilmapiiri 3/3, suihku- ja pukuhuoneet 2/3, saunavaihtoehdot 2/3, oheispalvelut 3/3, aukioloajat 2/3, hinta 2/3, saavutettavuus 2/3."}, {"rank": "7", "name": "Kaupinoja", "municipality": "Tampere", "address": "Kaupinpuistokatu 1, Tampere", "points": 39.0, "open": "ma–pe 15–21.15, la–su 12–21.15 (suljettu joka kuukauden toinen tiistai, lisäksi suljettu 6.–7.5.2025 korjaustöiden vuoksi)", "price": "Aikuiset 12€, lapset 5€.", "details": "Löylyt 22/25, miljöö 4/4, ilmapiiri 1/3, suihku- ja pukuhuoneet 3/3, saunavaihtoehdot 1/3, oheispalvelut 1/3, aukioloajat 3/3, hinta 1/3, saavutettavuus 3/3."}, {"rank": "6", "name": "Kaukajärven sauna", "municipality": "Tampere", "address": "Kangasalantie 80, Tampere", "points": 39.0, "open": "päivittäin vanha sauna 12–21.45, uusi sauna ma–pe 16–21.30 ja la–su 12–21.30.", "price": "11€, lapset alle 14-v. 6€, eläkeläinen/opiskelija 9 €", "details": "Löylyt 20/25, miljöö 3/4, ilmapiiri 2/3, suihku- ja pukuhuoneet 3/3, saunavaihtoehdot 2/3, oheispalvelut 2/3, aukioloajat 3/3, hinta 1/3, saavutettavuus 3/3."}, {"rank": "5", "name": "Rauhaniemi", "municipality": "Tampere", "address": "Rauhaniementie 24, Tampere", "points": 39.0, "open": "vuoden jokaisena päivänä ma–pe 14–22.30, la–su 11–22.30.", "price": "11€, alle 14-vuotiaat 5€", "details": "Löylyt 22/25, miljöö 4/4, ilmapiiri 2/3, suihku- ja pukuhuoneet 1/3, saunavaihtoehdot 2/3, oheispalvelut 1/3, aukioloajat 3/3, hinta 1/3, saavutettavuus 3/3."}, {"rank": "4", "name": "Villa Vihta", "municipality": "Ikaalinen", "address": "Toivolansaarentie 3, Ikaalinen", "points": 40.0, "open": "ti, to ja su 17–20.", "price": "8€, lapset 4€", "details": "Löylyt 22/25, miljöö 4/4, ilmapiiri 2/3, suihku- ja pukuhuoneet 3/3, saunavaihtoehdot 1/3, oheispalvelut 2/3, aukioloajat 2/3, hinta 2/3, saavutettavuus 2/3."}, {"rank": "3", "name": "Niemi-Kapeen tila", "municipality": "Tampere", "address": "Kapeenniementie 22, Terälahti", "points": 40.0, "open": "yleinen vuoro talvikaudella sunnuntai-iltaisin parillisilla viikoilla kello 15–17 ja 17.30–19.30, viimeisen kerran 4.5.2025. Kesäkaudella yleinen vuoro tiistaisin.", "price": "25€", "details": "Löylyt 24/25, miljöö 4/4, ilmapiiri 2/3, suihku- ja pukuhuoneet 2/3, saunavaihtoehdot 3/3, oheispalvelut 2/3, aukioloajat 1/3, hinta 1/3, saavutettavuus 1/3."}, {"rank": "1", "name": "Kauhtua", "municipality": "Kyröskoski", "address": "Kauhtuantie 6, Kyröskoski", "points": 41.0, "open": "talvikaudella ma 15.30–20.30, ke 15.30–20.30, pe 15.30–20.30, la 14–17.30 (vain tavallinen sauna), kesällä vain ke 15.30–20.30.", "price": "kertamaksu 9€ (alle 10-v. ilmaiseksi, 10–16-v. 2€)", "details": "Löylyt 25/25, miljöö 2/4, ilmapiiri 3/3, suihku- ja pukuhuoneet 2/3, saunavaihtoehdot 3/3, oheispalvelut 2/3, aukioloajat 2/3, hinta 1/3, saavutettavuus 1/3."}, {"rank": "1", "name": "Veittijärven sauna", "municipality": "Ylöjärvi", "address": "Viljakkalantie 140, Ylöjärvi", "points": 41.0, "open": "ti ja ke 16–21, pe 15–21, la 14–21, su 14–21. Remonttitauko juhannuksen 2025 jälkeen.", "price": "10€, jäsenille 8€, lapset 5€", "details": "Löylyt 24/25, miljöö 4/4, ilmapiiri 2/3, suihku- ja pukuhuoneet 3/3, saunavaihtoehdot 3/3, oheispalvelut 1/3, aukioloajat 2/3, hinta 1/3, saavutettavuus 1/3."}];
 
 // Basic map
-const map = L.map('map', { zoomControl: true }).setView([61.5, 23.8], 9); // Tampere-ish
+const map = L.map('map', { zoomControl: true }).setView([61.5, 23.8], 9);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   maxZoom: 19,
   attribution: '&copy; OpenStreetMap'
@@ -138,6 +134,33 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 const markersLayer = L.layerGroup().addTo(map);
 let markers = []; // { rec, marker, lat, lon }
 
+const sidebar = document.getElementById('sidebar');
+
+// Leaflet-control: Lista/Kartta -toggle (näkyy varmasti iPhonessa)
+const SidebarToggle = L.Control.extend({
+  options: { position: 'topright' },
+  onAdd: function () {
+    const btn = L.DomUtil.create('button', 'sauna-toggle-btn');
+    btn.classList.add('sauna-toggle-btn');
+    btn.textContent = '📋 Näytä lista';
+
+    // estä kartan zoom/drag kun klikataan nappia
+    L.DomEvent.disableClickPropagation(btn);
+    L.DomEvent.disableScrollPropagation(btn);
+
+    btn.addEventListener('click', () => {
+      sidebar.classList.toggle('open');
+      btn.textContent = sidebar.classList.contains('open')
+        ? '🗺️ Näytä kartta'
+        : '📋 Näytä lista';
+    });
+
+    return btn;
+  }
+});
+map.addControl(new SidebarToggle());
+
+// Helpers
 function colorFor(points) {
   if (points == null) return '#999';
   if (points >= 40) return '#2a9d8f';
@@ -177,9 +200,7 @@ async function geocode(rec) {
 
   const q = encodeURIComponent(`${rec.address || ''}`);
   const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q=${q}`;
-  const res = await fetch(url, {
-    headers: { 'Accept': 'application/json' }
-  });
+  const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
   if (!res.ok) throw new Error(`Geokoodaus epäonnistui: ${res.status}`);
   const js = await res.json();
   if (!js || !js.length) throw new Error('Ei osumaa osoitteelle');
@@ -222,6 +243,15 @@ function renderList(filtered) {
   });
 }
 
+function showFiltered(filtered) {
+  markers.forEach(m => {
+    const keep = filtered.some(r => r.rank === m.rec.rank && r.name === m.rec.name);
+    if (keep) markersLayer.addLayer(m.marker);
+    else markersLayer.removeLayer(m.marker);
+  });
+  renderList(filtered);
+}
+
 function applyFilters() {
   const q = document.getElementById('q').value.trim().toLowerCase();
   const minP = parseFloat(document.getElementById('minPoints').value || '');
@@ -231,22 +261,14 @@ function applyFilters() {
     const okP = isNaN(minP) || (r.points != null && r.points >= minP);
     return okQ && okP;
   });
-  markers.forEach(m => {
-    const keep = filtered.some(r => r.rank === m.rec.rank && r.name === m.rec.name);
-    if (keep) markersLayer.addLayer(m.marker);
-    else markersLayer.removeLayer(m.marker);
-  });
-  renderList(filtered);
+  showFiltered(filtered);
 }
 
 function fitMapToVisible() {
   const visible = [];
-  markersLayer.eachLayer(l => {
-    if (l.getLatLng) visible.push(l.getLatLng());
-  });
+  markersLayer.eachLayer(l => { if (l.getLatLng) visible.push(l.getLatLng()); });
   if (!visible.length) return;
-  const bounds = L.latLngBounds(visible);
-  map.fitBounds(bounds.pad(0.15));
+  map.fitBounds(L.latLngBounds(visible).pad(0.15));
 }
 
 async function runGeocodeQueue() {
@@ -276,7 +298,6 @@ async function runGeocodeQueue() {
     }
     done += 1;
     setProgress(done, total);
-    // Polite delay: ~1 req/sec (cached items return instantly)
     await new Promise(r => setTimeout(r, 1050));
   }
 
@@ -285,20 +306,9 @@ async function runGeocodeQueue() {
   fitMapToVisible();
 }
 
-
 // Top 10 toggle
 const topBtn = document.getElementById('top10');
 let topMode = false;
-
-function showFiltered(filtered) {
-  // show/hide markers
-  markers.forEach(m => {
-    const keep = filtered.some(r => r.rank === m.rec.rank && r.name === m.rec.name);
-    if (keep) markersLayer.addLayer(m.marker);
-    else markersLayer.removeLayer(m.marker);
-  });
-  renderList(filtered);
-}
 
 function computeTop10() {
   return [...SAUNAS]
@@ -310,11 +320,9 @@ function computeTop10() {
 topBtn.addEventListener('click', () => {
   topMode = !topMode;
   if (topMode) {
-    // reset user filters for clarity
     document.getElementById('q').value = '';
     document.getElementById('minPoints').value = '';
-    const top = computeTop10();
-    showFiltered(top);
+    showFiltered(computeTop10());
     topBtn.textContent = 'Näytä kaikki';
     fitMapToVisible();
   } else {
@@ -324,24 +332,16 @@ topBtn.addEventListener('click', () => {
   }
 });
 
-// If user starts filtering manually, exit top mode
+// Jos käyttäjä suodattaa, poistutaan top-modesta
 document.getElementById('q').addEventListener('input', () => {
-  if (topMode) {
-    topMode = false;
-    topBtn.textContent = 'Top 10';
-  }
+  if (topMode) { topMode = false; topBtn.textContent = 'Top 10'; }
+  applyFilters();
 });
 document.getElementById('minPoints').addEventListener('change', () => {
-  if (topMode) {
-    topMode = false;
-    topBtn.textContent = 'Top 10';
-  }
+  if (topMode) { topMode = false; topBtn.textContent = 'Top 10'; }
+  applyFilters();
 });
 
-
-// Controls
-document.getElementById('q').addEventListener('input', applyFilters);
-document.getElementById('minPoints').addEventListener('change', applyFilters);
 document.getElementById('fit').addEventListener('click', fitMapToVisible);
 document.getElementById('clearCache').addEventListener('click', () => {
   const prefix = 'sauna_geo_v1::';
@@ -357,18 +357,5 @@ document.getElementById('clearCache').addEventListener('click', () => {
 renderList(SAUNAS.slice(0, 50));
 runGeocodeQueue();
 </script>
-
-<script>
-const toggleBtn = document.getElementById('mobileToggle');
-const sidebar = document.getElementById('sidebar');
-
-toggleBtn.addEventListener('click', () => {
-  sidebar.classList.toggle('open');
-  toggleBtn.textContent = sidebar.classList.contains('open')
-    ? '🗺️ Näytä kartta'
-    : '📋 Näytä lista';
-});
-</script>
-
 </body>
 </html>
