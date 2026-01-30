@@ -55,16 +55,22 @@
 
 #mobileToggle {
   display: none;
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  z-index: 1000;
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  left: auto;
+  z-index: 99999;
   background: white;
   border: 1px solid #ccc;
   border-radius: 999px;
   padding: 8px 12px;
   font-size: 14px;
   box-shadow: 0 2px 6px rgba(0,0,0,.25);
+}
+
+/* iPhone notch -ystävällinen */
+@supports (padding: env(safe-area-inset-top)) {
+  #mobileToggle { top: calc(env(safe-area-inset-top) + 12px); }
 }
 
 </style>
